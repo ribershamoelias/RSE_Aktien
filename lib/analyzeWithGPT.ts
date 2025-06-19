@@ -1,1 +1,0 @@
-// GPT-Analyse durchführen
