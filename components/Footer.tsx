@@ -1,0 +1,1 @@
+// Footer mit rechtlichen Links
