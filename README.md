@@ -1,1 +1,0 @@
-# RSE_Aktien
