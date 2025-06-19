@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RSE Stock Insights – KI‑gestützte Aktienanalysen</title>
+  <link rel="icon" href="/favicon-32x32.png" type="image/png" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ===============  Base Layout & Theme  =============== */
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at 50% 20%, #0f172a, #1e293b);
+      color: #f1f5f9;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* Starfield background effect */
+    .stars {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .stars div {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      width: 2px;
+      height: 2px;
+      animation: twinkle 3s infinite;
+    }
+    @keyframes twinkle {
+      0%, 100% { opacity: .15; }
+      50% { opacity: .8; }
+    }
+
+    /* Card Container */
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 860px;
+      margin: 4rem auto;
+      padding: 2.5rem 2rem 3.5rem;
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 22px;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 0 60px rgba(0,255,255,.08);
+      text-align: center;
+      animation: fadeInUp 1.4s ease-out;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: .8rem;
+      color: #38bdf8;
+    }
+    p.lead {
+      font-size: 1.1rem;
+      color: #cbd5e1;
+      margin-bottom: 2rem;
+    }
+
+    /* =========  Interactive Elements  ========= */
+    .search-bar {
+      display: flex;
+      justify-content: center;
+      gap: .6rem;
+      margin-bottom: 1.6rem;
+    }
+    .search-bar input {
+      flex: 0 1 240px;
+      padding: .6rem .9rem;
+      border-radius: 8px;
+      border: 1px solid #334155;
+      background: #0f172a;
+      color: #f8fafc;
+      font-size: 1rem;
+    }
+    .search-bar button {
+      padding: .6rem 1.2rem;
+      border: 0;
+      background: #22d3ee;
+      color: #0f172a;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+    .search-bar button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 14px rgba(34,211,238,.4);
+    }
+
+    /* Results sections */
+    .results {
+      display: grid;
+      gap: 2rem;
+      margin-top: 1.8rem;
+    }
+    .card {
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 20px;
+      padding: 1.4rem 1.2rem 1.8rem;
+      text-align: left;
+    }
+    .card h2 {
+      margin-top: 0;
+      font-size: 1.4rem;
+      margin-bottom: .8rem;
+      color: #bae6fd;
+    }
+    .card pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-size: .95rem;
+      color: #e2e8f0;
+    }
+
+    /* Loader animation */
+    .loader {
+      width: 18px;
+      height: 18px;
+      margin-inline: auto;
+      border-radius: 50%;
+      border: 3px solid #22d3ee;
+      border-top-color: transparent;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Buttons for language switching (optional) */
+    .lang-buttons {
+      position: absolute;
+      top: 20px;
+      right: 26px;
+      z-index: 2;
+    }
+    .lang-buttons button {
+      background: #334155;
+      color: #fff;
+      border: none;
+      padding: .4rem .8rem;
+      margin-left: .35rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: .85rem;
+      transition: transform .2s ease, background .25s;
+    }
+    .lang-buttons button:hover {
+      transform: scale(1.07);
+      background: #475569;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Optional language buttons -->
+  <div class="lang-buttons">
+    <button onclick="setLanguage('de')">DE</button>
+    <button onclick="setLanguage('en')">EN</button>
+  </div>
+
+  <!-- Starfield background -->
+  <div class="stars" id="stars"></div>
+
+  <!-- Main content container -->
+  <div class="container">
+    <h1 id="title">RSE Stock Insights</h1>
+    <p id="subtitle" class="lead">KI‑gestützte Aktienanalysen, News &amp; Prognosen in Echtzeit</p>
+
+    <!-- Search form -->
+    <div class="search-bar">
+      <input id="tickerInput" type="text" placeholder="Ticker eingeben … (z. B. AAPL)" autocomplete="off" />
+      <button onclick="analyze()">Analysieren</button>
+    </div>
+
+    <!-- Result cards -->
+    <div class="results">
+      <div id="aiCard" class="card" style="display:none;">
+        <h2 id="aiHeading">KI‑Analyse</h2>
+        <div id="aiContent"><div class="loader"></div></div>
+      </div>
+      <div id="newsCard" class="card" style="display:none;">
+        <h2 id="newsHeading">Aktuelle News</h2>
+        <div id="newsContent"><div class="loader"></div></div>
+      </div>
+    </div>
+
+    <p style="margin-top:2.8rem;font-size:.8rem;color:#94a3b8;">
+      <strong>Disclaimer:</strong> Alle Analysen dienen ausschließlich Informationszwecken und stellen keine Anlageberatung dar.
+    </p>
+  </div>
+
+  <script>
+    /* ==========  Multi-language texts  ========== */
+    const content = {
+      de: {
+        title: 'RSE Stock Insights',
+        subtitle: 'KI‑gestützte Aktienanalysen, News & Prognosen in Echtzeit',
+        aiHeading: 'KI‑Analyse',
+        newsHeading: 'Aktuelle News',
+        placeholder: 'Ticker eingeben … (z. B. AAPL)',
+        disclaimer: 'Alle Analysen dienen ausschließlich Informationszwecken und stellen keine Anlageberatung dar.'
+      },
+      en: {
+        title: 'RSE Stock Insights',
+        subtitle: 'AI‑powered stock analytics, news & forecasts in real time',
+        aiHeading: 'AI Analysis',
+        newsHeading: 'Latest News',
+        placeholder: 'Enter ticker … (e.g. AAPL)',
+        disclaimer: 'All analyses are provided for information only and do not constitute investment advice.'
+      }
+    };
+
+    function setLanguage(lang) {
+      const c = content[lang];
+      document.getElementById('title').innerText = c.title;
+      document.getElementById('subtitle').innerText = c.subtitle;
+      document.getElementById('aiHeading').innerText = c.aiHeading;
+      document.getElementById('newsHeading').innerText = c.newsHeading;
+      document.getElementById('tickerInput').placeholder = c.placeholder;
+      document.querySelector('.container p strong').parentElement.innerHTML = `<strong>Disclaimer:</strong> ${c.disclaimer}`;
+    }
+
+    /* ==========  Starfield generation  ========== */
+    const stars = document.getElementById('stars');
+    for (let i = 0; i < 140; i++) {
+      const star = document.createElement('div');
+      star.style.top = Math.random() * 100 + 'vh';
+      star.style.left = Math.random() * 100 + 'vw';
+      star.style.animationDelay = (Math.random() * 3) + 's';
+      stars.appendChild(star);
+    }
+
+    /* ==========  Main analysis workflow  ========== */
+    async function analyze() {
+      const symbol = document.getElementById('tickerInput').value.trim().toUpperCase();
+      if (!symbol) return;
+
+      // Show result cards & reset content
+      document.getElementById('aiCard').style.display = 'block';
+      document.getElementById('newsCard').style.display = 'block';
+      document.getElementById('aiContent').innerHTML = '<div class="loader"></div>';
+      document.getElementById('newsContent').innerHTML = '<div class="loader"></div>';
+
+      try {
+        /* ----------  1) Fetch historical price data  ---------- */
+        // Replace YOUR_ALPHA_KEY with your Alpha Vantage API key or any data provider you prefer
+        const priceRes = await fetch(`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=${symbol}&outputsize=compact&apikey=YOUR_ALPHA_KEY`);
+        const priceData = await priceRes.json();
+        if (priceData['Error Message']) throw new Error('Ticker nicht gefunden');
+
+        /* ----------  2) Fetch recent news  ---------- */
+        // Replace YOUR_NEWS_KEY with your NewsAPI.org (or alternative) key
+        const from = new Date(Date.now() - 1000*60*60*24*14).toISOString().split('T')[0]; // last 14 days
+        const newsRes = await fetch(`https://newsapi.org/v2/everything?q=${symbol}&from=${from}&language=de,en&sortBy=publishedAt&apiKey=YOUR_NEWS_KEY`);
+        const newsData = await newsRes.json();
+
+        /* ----------  3) Send data to your backend AI endpoint ---------- */
+        // Here we post both time‑series & maybe headlines to a serverless function
+        // running OpenAI GPT‑4o / local LLM fine‑tuned for financial analytics.
+        // Replace /api/analyze with your own endpoint.
+        const aiRes = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ symbol, priceData, newsData })
+        });
+        const aiJson = await aiRes.json();
+
+        /* ----------  4) Render AI insight  ---------- */
+        document.getElementById('aiContent').innerHTML = `
+          <pre>${aiJson.analysis || 'Keine Analyse verfügbar.'}</pre>
+          <pre>Prognose (nächste 30 Tage): ${aiJson.forecast || '–'}</pre>`;
+
+        /* ----------  5) Render News feed  ---------- */
+        if (newsData.articles && newsData.articles.length) {
+          const list = newsData.articles.slice(0, 6).map(a =>
+            `<p><a href="${a.url}" target="_blank" style="color:#38bdf8;text-decoration:none;">${a.title}</a> <span style="font-size:.75rem;color:#94a3b8;">(${new Date(a.publishedAt).toLocaleDateString()})</span></p>`).join('');
+          document.getElementById('newsContent').innerHTML = list;
+        } else {
+          document.getElementById('newsContent').innerHTML = '<p>Keine aktuellen Nachrichten gefunden.</p>';
+        }
+
+      } catch (err) {
+        document.getElementById('aiContent').innerHTML = `<p style="color:#f87171;">${err.message}</p>`;
+        document.getElementById('newsContent').innerHTML = '<p> </p>';
+      }
+    }
+
+    /* ==========  Keyboard shortcut (Enter submits)  ========== */
+    document.getElementById('tickerInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') analyze();
+    });
+  </script>
+</body>
+</html>
