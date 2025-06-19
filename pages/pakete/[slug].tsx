@@ -1,1 +1,0 @@
-// Dynamische Paketseite mit Stripe-Paywall
