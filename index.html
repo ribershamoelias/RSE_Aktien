@@ -256,14 +256,14 @@
       try {
         /* ----------  1) Fetch historical price data  ---------- */
         // Replace YOUR_ALPHA_KEY with your Alpha Vantage API key or any data provider you prefer
-        const priceRes = await fetch(`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=${symbol}&outputsize=compact&apikey=YOUR_ALPHA_KEY`);
+        const priceRes = await fetch(`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=${symbol}&outputsize=compact&apikey=3D1P5MEZOZEN8YON`);
         const priceData = await priceRes.json();
         if (priceData['Error Message']) throw new Error('Ticker nicht gefunden');
 
         /* ----------  2) Fetch recent news  ---------- */
         // Replace YOUR_NEWS_KEY with your NewsAPI.org (or alternative) key
         const from = new Date(Date.now() - 1000*60*60*24*14).toISOString().split('T')[0]; // last 14 days
-        const newsRes = await fetch(`https://newsapi.org/v2/everything?q=${symbol}&from=${from}&language=de,en&sortBy=publishedAt&apiKey=YOUR_NEWS_KEY`);
+        const newsRes = await fetch(`https://newsapi.org/v2/everything?q=${symbol}&from=${from}&language=de,en&sortBy=publishedAt&apiKey=3ea3bc51d7c64d39a34dc04fafa574cc`);
         const newsData = await newsRes.json();
 
         /* ----------  3) Send data to your backend AI endpoint ---------- */
